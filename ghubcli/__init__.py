@@ -1,1 +1,1 @@
-from .ghubutils import Context, GHub
+from .runner import run_ghub
