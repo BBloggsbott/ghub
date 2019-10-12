@@ -15,7 +15,7 @@ class GHub(object):
     client_secret = "1931c8c29d363fb5bbe9c3e885de8a8036790bcb"
     def __init__(self, reauthorize = False):
         self.redir_response = ""
-        self.data_path = Path.home() / ".ghub_cli"
+        self.data_path = Path.home() / ".ghub"
         self.auth_filename = "auth.json"
         self.github = OAuth2Session(self.client_id)
         self.oauth_data = ""
@@ -24,7 +24,10 @@ class GHub(object):
         self.print_auth_user()
     
     def print_auth_user(self):
-        print("Logged in as {}".format(self.user["login"]))
+        print("Logged in as {}".format(self.get_user_username()))
+
+    def get_user_username(self):
+        return self.user["login"]
 
 class Context(object):
     def __init__(self, user):
@@ -40,8 +43,10 @@ class Context(object):
         self.context = "user"
         self.location = username + "/" + tab
 
-    def set_context_to_root(self):
+    def set_context_to_root(self, user=None):
         self.context = "root"
+        if user != None:
+            self.root_location = user
         self.location = self.root_location
 
     def set_context_to_orf(self, orgname, tab=""):
@@ -70,9 +75,10 @@ class Interpreter(object):
     def help(self, command):
         print("Command: {}\n{}".format(command, self.command_info[command]["help"]))
 
-    def reauthorize(self, args, ghub):
+    def reauthorize(self, args, ghub, context):
         if len(args) == 0:
             authorize(ghub, True)
+            context.set_context_to_root(ghub.get_user_username())
             ghub.print_auth_user()
         else:
             if args[0] != "help":
@@ -97,7 +103,7 @@ class Interpreter(object):
         if not verified:
             return
         if command == "reauthorize":
-            self.reauthorize(args, ghub)
+            self.reauthorize(args, ghub, context)
         elif command == "exit":
             self.exit(args)
         elif command == "cd":
