@@ -1,1 +1,1 @@
-from .githubutils import GHub
+from .ghubutils import Context, GHub

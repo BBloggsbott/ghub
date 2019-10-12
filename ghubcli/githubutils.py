@@ -1,16 +1,12 @@
-import requests
-from pathlib import Path
 import os
 import json
 import webbrowser
-
-from requests_oauthlib import OAuth2Session
 
 def authorize(ghcli, reauthorize = False):
     if not os.path.isfile(ghcli.data_path / ghcli.auth_filename) or reauthorize:
         authorization_base_url = 'https://github.com/login/oauth/authorize'
         token_url = 'https://github.com/login/oauth/access_token'
-        authorization_url, state = ghcli.github.authorization_url(authorization_base_url)
+        authorization_url, _ = ghcli.github.authorization_url(authorization_base_url)
         webbrowser.open(authorization_url)
         print("Please visit this site and grant access: {}".format(authorization_url))
         redirect_response = input("Please enter the URL you were redirected to after granting access: ")
@@ -27,24 +23,3 @@ def authorize(ghcli, reauthorize = False):
         data_file.close()
         ghcli.oauth_data = oauth_data
         ghcli.github.token = oauth_data
-
-        
-
-
-class GHub(object):
-    api_url = "https://api.github.com/"
-    endpoints = {
-        "users" : "users/",
-        "user" : "user"
-    }
-    client_id = "ad1ef4c67333561cc9ea"
-    client_secret = "1931c8c29d363fb5bbe9c3e885de8a8036790bcb"
-    def __init__(self, reauthorize = False):
-        self.redir_response = ""
-        self.data_path = Path.home() / ".ghub_cli"
-        self.auth_filename = "auth.json"
-        self.github = OAuth2Session(self.client_id)
-        self.oauth_data = ""
-        authorize(self, reauthorize)
-        self.user = json.loads(self.github.get(self.api_url+self.endpoints["user"]).content.decode("utf-8"))
-        print("Logged in as {}".format(self.user["login"]))
