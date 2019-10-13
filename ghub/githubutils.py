@@ -1,8 +1,15 @@
+"""Utilities for interacting with GitHub"""
 import os
 import json
 import webbrowser
 
 def authorize(ghub, reauthorize = False):
+    """Authorize a user for GHub
+    
+    Keyword arguments:
+    ghub -- the ghub object that needs authorization
+    reauthorize -- performs authorization again (default False)
+    """
     if not os.path.isfile(ghub.data_path / ghub.auth_filename) or reauthorize:
         authorization_base_url = 'https://github.com/login/oauth/authorize'
         token_url = 'https://github.com/login/oauth/access_token'

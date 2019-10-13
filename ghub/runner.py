@@ -1,6 +1,9 @@
-from .ghubutils import Context, GHub, Interpreter
+"""Utilities to run GHub"""
+from .ghubutils import Context, GHub
+from .cliutils import Interpreter
 
 def run_ghub():
+    """Run GHub"""
     print("Welcome to GHub - A Unix like CLI for GitHub.")
     print("Starting initial setup...")
     ghub = GHub()
