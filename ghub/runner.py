@@ -2,14 +2,15 @@
 from .ghubutils import Context, GHub
 from .cliutils import Interpreter
 
+import os
+
 def run_ghub():
     """Run GHub"""
-    print("Welcome to GHub - A Unix like CLI for GitHub.")
+    print("Welcome to GHub - Browse GitHub like it is UNIX")
     print("Starting initial setup...")
     ghub = GHub()
-    context = Context(ghub.user)
     interpreter = Interpreter()
     print("Setup done.")
     while(True):
-        command = input("ghub:{} {}> ".format(context.context, context.location))
-        interpreter.execute(command, ghub, context)
+        command = input("ghub:{} {}> ".format(ghub.context.context, ghub.context.location))
+        interpreter.execute(command, ghub)

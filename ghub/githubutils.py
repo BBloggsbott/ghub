@@ -30,3 +30,17 @@ def authorize(ghub, reauthorize = False):
         data_file.close()
         ghub.oauth_data = oauth_data
         ghub.github.token = oauth_data
+
+
+def get_user_tabs(ghub, tab=""):
+    if ghub.context.context == "root":
+        if tab == "":
+            ghub.context.set_context_to_root()
+        elif tab == "repos":
+            ghub.context.context = "repos"
+            response = ghub.github.get(ghub.api_url+ghub.endpoints["user"]+"/repos")
+            if response.status_code == 200:
+                ghub.context.location = ghub.user["login"]+"/"+"repos"
+                ghub.context.cache = json.loads(response.content.decode("utf-8"))
+    else:
+        pass

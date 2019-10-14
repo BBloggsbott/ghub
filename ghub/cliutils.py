@@ -1,7 +1,8 @@
 """Utilities for the command line interface"""
 import sys
+import os
 
-from .githubutils import authorize
+from .githubutils import authorize, get_user_tabs
 
 class Interpreter(object):
     """Class to act as an in interpreter for the GHub command line"""
@@ -9,8 +10,10 @@ class Interpreter(object):
         """Initialize the interpreter for GHub"""
         self.command_info = {}  # Stores met information about the commands supported by GHub
         self.add_command("reauthorize", "Perform GitHub OAuth procedure again.")
-        self.add_command("cd", "Change context. Usage: \ncd user USERNAME\ncd org ORGNAME\ncd USERNAME/REPONAME", [1, 2])
+        self.add_command("cd", "Change context. Usage: \ncd user USERNAME\ncd org ORGNAME\ncd USERNAME/REPONAME", [0, 1, 2])
         self.add_command("exit", "Exit GHub.")
+        self.add_command("clear", "Clear the screen")
+        self.add_command("ls", "List everything in the current context")
 
     def verify(self, command):
         """Verify the syntax of the command
@@ -36,7 +39,7 @@ class Interpreter(object):
         """
         print("Command: {}\n{}".format(command, self.command_info[command]["help"]))
 
-    def reauthorize(self, args, ghub, context):
+    def reauthorize(self, args, ghub):
         """execute the reauthorize command
         
         Keyword arguments:
@@ -46,7 +49,7 @@ class Interpreter(object):
         """
         if len(args) == 0:
             authorize(ghub, True)
-            context.set_context_to_root(ghub.get_user_username())
+            ghub.context.set_context_to_root(ghub.get_user_username())
             ghub.print_auth_user()
         else:
             if args[0] != "help":
@@ -67,15 +70,39 @@ class Interpreter(object):
                 print("Incorrect argument passed to exit")
             self.help("exit")
 
-    def cd(self, args):
+    def clear(self, args):
+        """clear the screen
+        
+        Keyword arguments:
+        args -- arguments for the command
+        """
+        if len(args) == 0:
+            os.system('cls' if os.name == 'nt' else 'clear')
+        else:
+            if args[0] != "help":
+                print("Incorrect argument passed to exit")
+            self.help("exit")
+
+    def cd(self, args, ghub):
         """execute the cd command
         
         Keyword arguments:
         args -- arguments for the command
         """
-        print("Under Development.")
+        if len(args) == 1:
+            if ghub.context.context == "root" or ghub.context.context == "user":
+                get_user_tabs(ghub, args[0])
+        elif len(args) == 0:
+            ghub.context.set_context_to_root()
+        else:
+            print("Under development")
 
-    def execute(self, command, ghub, context):
+    def ls(self, ghub):
+        if ghub.context.context == "repos":
+            for i in ghub.context.cache:
+                print(i["full_name"])
+
+    def execute(self, command, ghub):
         """Execute a command
 
         Keyword arguments:
@@ -88,11 +115,20 @@ class Interpreter(object):
         if not verified:
             return
         if command == "reauthorize":
-            self.reauthorize(args, ghub, context)
+            self.reauthorize(args, ghub)
         elif command == "exit":
             self.exit(args)
         elif command == "cd":
-            self.cd(args)
+            self.cd(args, ghub)
+        elif command == "clear":
+            self.clear(args)
+        elif command == "ls":
+            if len(args) != 0:
+                self.help("ls")
+            else:
+                self.ls(ghub)
+        elif command == "help":
+            print("GHub - Browse GitHub like Unix. See wiki for help. <wikilink>")
 
     def add_command(self, command, help = "", num_args = [0,1]):
         """Add meta information for a new command"""

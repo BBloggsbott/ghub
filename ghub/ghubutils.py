@@ -26,6 +26,7 @@ class GHub(object):
         self.oauth_data = ""    # Data from GitHub OAuth 
         authorize(self, reauthorize) 
         self.user = json.loads(self.github.get(self.api_url+self.endpoints["user"]).content.decode("utf-8"))    # Info of the Authorized user
+        self.context = Context(self.user)
         self.print_auth_user()
     
     def print_auth_user(self):
@@ -43,6 +44,7 @@ class Context(object):
         self.context = "root"   # the current context
         self.location = user["login"]   # the current location in the GitHub tree
         self.root_location = user["login"]  # the root location
+        self.cache = None
 
     def set_context_to_repo(self, username, reponame):
         """Set the context to that of a repository
