@@ -20,7 +20,7 @@ class GHub(object):
         "1931c8c29d363fb5bbe9c3e885de8a8036790bcb"
     )  # client secret for GitHub's OAuth
 
-    def __init__(self, reauthorize=False):
+    def __init__(self, reauthorize=False, fromenv=False):
         """Initialize the GHub session
 
         Keyword arguments:
@@ -32,7 +32,7 @@ class GHub(object):
         self.auth_filename = "auth.json"  # Filename with OAuth info
         self.github = OAuth2Session(self.client_id)  # OAuth2Session for github
         self.oauth_data = ""  # Data from GitHub OAuth
-        authorize(self, reauthorize)
+        authorize(self, reauthorize, fromenv)
         self.user = json.loads(
             self.github.get(self.api_url + self.endpoints["user"]).content.decode(
                 "utf-8"

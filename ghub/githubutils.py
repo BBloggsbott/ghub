@@ -4,13 +4,18 @@ import json
 import webbrowser
 
 
-def authorize(ghub, reauthorize=False):
+def authorize(ghub, reauthorize=False, fromenv=False):
     """Authorize a user for GHub
 
     Keyword arguments:
     ghub -- the ghub object that needs authorization
     reauthorize -- performs authorization again (default False)
     """
+    if fromenv:
+        oauth_data = json.loads(os.environ["GHUB_CRED"])
+        ghub.oauth_data = oauth_data
+        ghub.github.token = oauth_data
+        return True
     if not os.path.isfile(ghub.data_path / ghub.auth_filename) or reauthorize:
         authorization_base_url = "https://github.com/login/oauth/authorize"
         token_url = "https://github.com/login/oauth/access_token"
@@ -31,12 +36,14 @@ def authorize(ghub, reauthorize=False):
         json.dump(response, data_file)
         data_file.close()
         ghub.oauth_data = response
+        return True
     else:
         data_file = open(ghub.data_path / ghub.auth_filename, "r")
         oauth_data = json.loads(data_file.read())
         data_file.close()
         ghub.oauth_data = oauth_data
         ghub.github.token = oauth_data
+        return True
 
 
 def get_user_tabs(ghub, tab=""):
