@@ -23,6 +23,7 @@ pre-commit==1.20.0
 py==1.8.0
 pyparsing==2.4.2
 pytest==5.2.2
+pytest-cov==2.8.1
 PyYAML==5.1.2
 requests==2.22.0
 requests-oauthlib==1.2.0
