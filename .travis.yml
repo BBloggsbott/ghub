@@ -4,8 +4,6 @@ python:
 install:
 - pip install -r requirements.txt
 script:
+- echo $GHUB_CRED
 - pytest --cov=./
 - codecov
-env:
-  global:
-    secure: FW13GQuvuMIa6vQqTfVj7aFXx9TTmyGWC0ACEXEKZBeZxFPKKuoqP2bhD1WoE33DsZocpSAzOGQSH15SyTMayw1ODi8bknDfdYvg1ileYuX1w8tyQs3sULympLL4fXDUK5CbDHAuQzKDxo+kRyQSqW4oJIoXSruaQbKUKQPa+BCRbUf99IxFAkXjtyuN3FXZgG/GPaXvYzU+OvHOnFSL/Ah705+eeQVzL/QMH8yLFGGAKXUV5+suEBtjsYYskUIbTgyUFF1DtnETYCC6khsR5dwphu6y4+aWHmX1Y+zW4IgFGUHFM7z4jG8sJX3ElS2p8hLKNkh3IJOMX082vHkyKA2PlI7X9sia9Z3xR998TsLxAu+HNCSmU3orsGrS13ads/9UE8uznfUEFv/1jyKM00OtqzOoe7XP5napgo6zPCoFchmujhte34widSf97wRRQUMQXaeokTVklmmq2q1og0GfV4dDNxhXxAASXO4LAiOHkQ8iFr3oImwAJKDRHG/pKRaAgKvHP6YPKRqvmRhUNaYwEZ/mE784z6tloBKpG6ifJycgwNuPXMZgZKBeQWcp8RRG85PO99TV/scTtXC4qIoaZP3g8O8dxAo/M/SrHMok4X9EufZ3hgHEUqF6wppma7/NHZQPorVcl+8DqNZhslq3is75A9uR0vKNB8sWFrU=
