@@ -1,10 +1,11 @@
 language: python
 python:
-  - "3.7"
-# command to install dependencies
+- '3.7'
 install:
-  - pip install -r requirements.txt
-# command to run tests
+- pip install -r requirements.txt
 script:
-  - pytest --cov=./
-  - codecov
+- pytest --cov=./
+- codecov
+env:
+  global:
+    secure: jKYr2EuiJoawtcMnibfve/Oaw3mK3eWa1tSR9FRBm/ilVa317+8pgkeqMqTzu/utysdNX5UxgOhUpLhv2VskbOSRChcFopq14SHIP0dIzCVHQlejwAocHn1ZAnGNsh/VvX0BsM7h2c1L8S3WdE4I5lzwv6ISCWDCL6eT0RmpCKAuiEAGGylDHcCYwtL8PoynTVkdYdBpjiUUjaLim+LiGvDAc22SWt9vYJcP8Aba1OCrQsYLEn1mIaEnOA4dN7+DPsYSu6BOKIxr1SuW46gI8R+ajk1YCPPk8JVEYWizGzHygdTFhvC5xXlgK/kqirQtzFiDCJle35gbicn5Qg2hWBVW4uA8/BmVmK/mrK4K0kwqxpKPROiiBU2Tbxg2XDPj7ZXA426jN1+1pL4BK5vXvJE4vNmi69OfzYCGwu5EnatKBWObiNGyaroLPwPjZzXOISu/T1DsXncsYMQ4Ikg1j88Aomyk5cbWJKyRplwuzZileIhYSgJSWZuwwuFtXy8GuBRQIGFp/PfogoSJjjBhXIQpssdtkJrQC9+FNSA21o2fLMKXTJGM4SaGyHfz1QD4Xtin0q9/v1PhW/0y0aKSpbjkmLavw6T988XGukXkCNTwOHNQfHlLKSGy1tlcxifFfD5q3QULKv1kle6sFeCAWbW0xNf60qkbeSC5F2Kj6Mg=
