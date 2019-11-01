@@ -1,8 +1,10 @@
 """Utilities to run GHub"""
 from .ghubutils import Context, GHub
 from .cliutils import Interpreter
+from termcolor import colored
 
 import os
+
 
 def run_ghub():
     """Run GHub"""
@@ -11,6 +13,11 @@ def run_ghub():
     ghub = GHub()
     interpreter = Interpreter()
     print("Setup done.")
-    while(True):
-        command = input("ghub:{} {}> ".format(ghub.context.context, ghub.context.location))
+    while True:
+        command = input(
+            "ghub:{} {}> ".format(
+                colored(ghub.context.context, "yellow"),
+                colored(ghub.context.location, "green"),
+            )
+        )
         interpreter.execute(command, ghub)

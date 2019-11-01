@@ -1,4 +1,4 @@
-from ghub.ghubutils import Context
+from ghub.context import Context
 
 
 class TestContextClass:
