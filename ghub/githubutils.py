@@ -3,6 +3,8 @@ import os
 import json
 import webbrowser
 
+from .context import Context
+
 
 def authorize(ghub, reauthorize=False, fromenv=False):
     """Authorize a user for GHub
@@ -49,10 +51,14 @@ def authorize(ghub, reauthorize=False, fromenv=False):
 def get_user_tabs(ghub, tab=""):
     if ghub.context.context == "root":
         if tab == "":
+            new_context = ghub.context.deepcopy()
+            new_context.set_prev_context(ghub.context)
+            ghub.context = new_context
             ghub.context.set_context_to_root()
         elif tab == "repos":
             response = ghub.github.get(ghub.api_url + ghub.endpoints["user"] + "/repos")
             if response.status_code == 200:
+                ghub.context = Context(prev_context=ghub.context)
                 ghub.context.cache = response.json()
                 ghub.context.location = ghub.user["login"] + "/" + "repos"
                 ghub.context.context = "repos"
@@ -72,12 +78,18 @@ def get_latest_commit(ghub, repo, branch="master"):
         return False
 
 
-def get_tree(ghub, repo, branch="master"):
-    latest_commit = get_latest_commit(ghub, repo, branch)
-    if latest_commit == False:
+def get_tree(ghub, repo=None, branch="master", tree_url=None):
+    if tree_url == None:
+        latest_commit = get_latest_commit(ghub, repo, branch)
+        if latest_commit == False:
+            return False
+        response = ghub.github.get(latest_commit["tree"]["url"])
+        if response.status_code == 200:
+            response = response.json()
+            return response
         return False
-    response = ghub.github.get(latest_commit["tree"]["url"])
-    if response.status_code == 200:
-        response = response.json()
-        return response
-    return False
+    else:
+        response = ghub.github.get(tree_url)
+        if response.status_code == 200:
+            response = response.json()
+            return response

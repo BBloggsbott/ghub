@@ -5,6 +5,7 @@ from termcolor import colored
 
 from .githubutils import authorize, get_user_tabs, get_tree
 from .repoutils import get_items_in_tree
+from .context import Context
 
 
 class Interpreter(object):
@@ -104,14 +105,33 @@ class Interpreter(object):
         args -- arguments for the command
         """
         if len(args) == 1:
-            if ghub.context.context == "root" or ghub.context.context == "user":
+            if args[0] == "..":
+                ghub.context = ghub.context.prev_context
+            elif ghub.context.context == "root" or ghub.context.context == "user":
                 get_user_tabs(ghub, args[0])
             elif ghub.context.context == "repos":
                 repo = "{}/{}".format(ghub.context.location.split("/")[0], args[0])
                 current_tree = get_tree(ghub, repo)
+                ghub.context = Context(prev_context=ghub.context)
                 ghub.context.context = "repo"
                 ghub.context.location = repo
                 ghub.context.cache = current_tree
+            elif ghub.context.context == "repo":
+                for i in ghub.context.cache["tree"]:
+                    if i["path"] == args[0]:
+                        if i["type"] == "tree":
+                            ghub.context = Context(prev_context=ghub.context)
+                            ghub.context.context = "repo"
+                            ghub.context.location = (
+                                ghub.context.prev_context.location + "/" + args[0]
+                            )
+                            ghub.context.cache = get_tree(ghub, tree_url=i["url"])
+                            return
+                        else:
+                            print("{} is not a directory.".format(args[0]))
+                            return
+                print("{} does not exits.".format(args[0]))
+
         elif len(args) == 0:
             ghub.context.set_context_to_root()
         else:
@@ -124,7 +144,7 @@ class Interpreter(object):
         if ghub.context.context == "repo":
             for i in get_items_in_tree(ghub):
                 if i[1] == "tree":
-                    print(colored(i[0], "green"))
+                    print(colored(i[0], "green", attrs=["bold"]))
                 else:
                     print(i[0])
 
