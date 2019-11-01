@@ -93,3 +93,10 @@ def get_tree(ghub, repo=None, branch="master", tree_url=None):
         if response.status_code == 200:
             response = response.json()
             return response
+
+
+def get_blob(ghub, blob_url):
+    response = ghub.github.get(blob_url)
+    if response.status_code == 200:
+        return response.json()
+    return False

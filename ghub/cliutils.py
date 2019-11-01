@@ -4,7 +4,7 @@ import os
 from termcolor import colored
 
 from .githubutils import authorize, get_user_tabs, get_tree
-from .repoutils import get_items_in_tree
+from .repoutils import get_items_in_tree, get_blob_content
 from .context import Context
 
 
@@ -25,6 +25,7 @@ class Interpreter(object):
         self.add_command("exit", "Exit GHub.")
         self.add_command("clear", "Clear the screen")
         self.add_command("ls", "List everything in the current context")
+        self.add_command("cat", "Show the contents of a file")
 
     def verify(self, command):
         """Verify the syntax of the command
@@ -147,6 +148,24 @@ class Interpreter(object):
                     print(colored(i[0], "green", attrs=["bold"]))
                 else:
                     print(i[0])
+
+    def cat(self, args, ghub):
+        if ghub.context.context == "repo":
+            for i in ghub.context.cache["tree"]:
+                if i["path"] == args[0]:
+                    if i["type"] == "blob":
+                        content = get_blob_content(ghub, i["url"])
+                        print(content)
+                        return
+                    else:
+                        print("{} is not a file.".format(args[0]))
+            print("{} does not exits.".format(args[0]))
+        else:
+            print(
+                "This command only works in the {} context".format(
+                    colored("repo", "yellow")
+                )
+            )
 
     def execute(self, command, ghub):
         """Execute a command
