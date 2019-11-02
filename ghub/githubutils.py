@@ -2,6 +2,7 @@
 import os
 import json
 import webbrowser
+import stat
 
 from .context import Context
 
@@ -37,6 +38,7 @@ def authorize(ghub, reauthorize=False, fromenv=False):
         data_file = open(ghub.data_path / ghub.auth_filename, "w+")
         json.dump(response, data_file)
         data_file.close()
+        os.chmod(ghub.data_path / ghub.auth_filename, stat.S_IRUSR | stat.S_IWUSR)
         ghub.oauth_data = response
         return True
     else:
