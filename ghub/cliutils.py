@@ -6,6 +6,7 @@ from termcolor import colored
 from .githubutils import authorize, get_user_tabs, get_tree
 from .repoutils import get_items_in_tree, get_blob_content
 from .context import Context
+from .commands import REAUTHORIZE, EXIT, CD, LS, CLEAR, CAT
 
 
 class Interpreter(object):
@@ -13,19 +14,17 @@ class Interpreter(object):
 
     def __init__(self):
         """Initialize the interpreter for GHub"""
-        self.command_info = (
-            {}
-        )  # Stores met information about the commands supported by GHub
-        self.add_command("reauthorize", "Perform GitHub OAuth procedure again.")
-        self.add_command(
-            "cd",
-            "Change context. Usage: \ncd user USERNAME\ncd org ORGNAME\ncd USERNAME/REPONAME",
-            [0, 1, 2],
-        )
-        self.add_command("exit", "Exit GHub.")
-        self.add_command("clear", "Clear the screen")
-        self.add_command("ls", "List everything in the current context")
-        self.add_command("cat", "Show the contents of a file")
+        self.registered_commands = []
+
+        self.register(REAUTHORIZE())
+        self.register(EXIT())
+        self.register(CD())
+        self.register(LS())
+        self.register(CLEAR())
+        self.register(CAT())
+
+    def register(self, cmd):
+        self.registered_commands.append(cmd)
 
     def verify(self, command):
         """Verify the syntax of the command
@@ -34,18 +33,15 @@ class Interpreter(object):
         command -- the command to verify
         """
         command, *args = command.split()
-        if command not in self.command_info.keys():
-            print("Command '{}' does not exist.".format(command))
-            return False, command, args
-        n_args = self.command_info[command]["num_args"]
-        if len(args) not in n_args:
-            print(
-                "Incorrect number of arguments passed. Accepted number of arguments: {}".format(
-                    ", ".join([str(i) for i in n_args])
-                )
-            )
-            return False, command, args
-        return True, command, args
+        command_name_verification = False
+        args_verification = False
+        for cmd in self.registered_commands:
+            if cmd.is_this_command(command):
+                command_name_verification = True
+                args_verification = cmd.is_correct_argnos(args)
+                command = cmd
+                break
+        return command_name_verification, args_verification, command, args
 
     def help(self, command):
         """print the help string
@@ -176,24 +172,17 @@ class Interpreter(object):
         context -- the current context
         """
         command = " ".join(i.strip() for i in command.split())
-        verified, command, args = self.verify(command)
-        if not verified:
-            return
-        if command == "reauthorize":
-            self.reauthorize(args, ghub)
-        elif command == "exit":
-            self.exit(args)
-        elif command == "cd":
-            self.cd(args, ghub)
-        elif command == "clear":
-            self.clear(args)
-        elif command == "ls":
-            if len(args) != 0:
-                self.help("ls")
+        command_name_verified, args_verified, command, args = self.verify(command)
+        if command_name_verified:
+            if not args_verified:
+                print("Incorrect number of arguments.")
+                command.print_help()
             else:
-                self.ls(ghub)
-        elif command == "help":
-            print("GHub - Browse GitHub like Unix. See wiki for help. <wikilink>")
+                if len(args) > 0:
+                    if args[0] == "help":
+                        command.print_help()
+                        return
+                command(args, ghub)
 
     def add_command(self, command, help="", num_args=[0, 1]):
         """Add meta information for a new command"""
