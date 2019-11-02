@@ -2,7 +2,7 @@ import sys
 import os
 from termcolor import colored
 
-from .githubutils import authorize, get_user_tabs, get_tree
+from .githubutils import authorize, get_user_tabs, get_tree, get_user
 from .repoutils import get_items_in_tree, get_blob_content
 from .context import Context
 
@@ -46,6 +46,9 @@ class CD(Command):
             elif ghub.context.context == "repos":
                 repo = "{}/{}".format(ghub.context.location.split("/")[0], args[0])
                 current_tree = get_tree(ghub, repo)
+                if not current_tree:
+                    print("Location not found")
+                    return
                 ghub.context = Context(prev_context=ghub.context)
                 ghub.context.context = "repo"
                 ghub.context.location = repo
@@ -65,6 +68,9 @@ class CD(Command):
                             print("{} is not a directory.".format(args[0]))
                             return
                 print("{} does not exits.".format(args[0]))
+        elif len(args) == 2:
+            if args[0] == "user":
+                get_user(ghub, args[1])
         elif len(args) == 0:
             ghub.context.set_context_to_root()
         else:

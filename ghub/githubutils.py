@@ -50,12 +50,21 @@ def authorize(ghub, reauthorize=False, fromenv=False):
         return True
 
 
+def get_user(ghub, user):
+    url = ghub.api_url + ghub.endpoints["users"] + user
+    response = ghub.github.get(url)
+    if response.status_code == 200:
+        ghub.context = Context(prev_context=ghub.context)
+        ghub.context.context = "user"
+        ghub.context.location = user
+        ghub.context.cache = response.json()
+        return True
+    return False
+
+
 def get_user_tabs(ghub, tab=""):
     if ghub.context.context == "root":
         if tab == "":
-            new_context = ghub.context.deepcopy()
-            new_context.set_prev_context(ghub.context)
-            ghub.context = new_context
             ghub.context.set_context_to_root()
         elif tab == "repos":
             response = ghub.github.get(ghub.api_url + ghub.endpoints["user"] + "/repos")
@@ -63,6 +72,25 @@ def get_user_tabs(ghub, tab=""):
                 ghub.context = Context(prev_context=ghub.context)
                 ghub.context.cache = response.json()
                 ghub.context.location = ghub.user["login"] + "/" + "repos"
+                ghub.context.context = "repos"
+            else:
+                print("Error getting repo data - " + response.status_code)
+    elif ghub.context.context == "user":
+        if tab == "":
+            ghub.context.set_context_to_root()
+        elif tab == "repos":
+            response = ghub.github.get(
+                ghub.api_url
+                + ghub.endpoints["users"]
+                + ghub.context.location
+                + "/repos"
+            )
+            if response.status_code == 200:
+                ghub.context = Context(prev_context=ghub.context)
+                ghub.context.cache = response.json()
+                ghub.context.location = (
+                    ghub.context.prev_context.location + "/" + "repos"
+                )
                 ghub.context.context = "repos"
             else:
                 print("Error getting repo data - " + response.status_code)
