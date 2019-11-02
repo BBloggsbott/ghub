@@ -128,13 +128,16 @@ class CAT(Command):
                     if i["type"] == "blob":
                         content = get_blob_content(ghub, i["url"])
                         print(content)
-                        return
+                        return True
                     else:
                         print("{} is not a file.".format(args[0]))
+                        return False
             print("{} does not exits.".format(args[0]))
+            return False
         else:
             print(
                 "This command only works in the {} context".format(
                     colored("repo", "yellow")
                 )
             )
+            return False

@@ -62,7 +62,7 @@ class Interpreter(object):
                     if args[0] == "help":
                         command.print_help()
                         return
-                command(args, ghub)
+                return command(args, ghub)
 
     def add_command(self, command, help="", num_args=[0, 1]):
         """Add meta information for a new command"""
