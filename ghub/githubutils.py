@@ -86,6 +86,17 @@ def get_user_tabs(ghub, tab=""):
                 ghub.context.context = "stars"
             else:
                 print("Error getting data - " + response.status_code)
+        elif tab == "followers" or tab == "following":
+            response = ghub.github.get(
+                ghub.api_url + ghub.endpoints["user"] + "/" + tab
+            )
+            if response.status_code == 200:
+                ghub.context = Context(prev_context=ghub.context)
+                ghub.context.cache = response.json()
+                ghub.context.location = ghub.user["login"] + "/" + tab
+                ghub.context.context = tab
+            else:
+                print("Error getting data - " + response.status_code)
     elif ghub.context.context == "user":
         if tab == "":
             ghub.context.set_context_to_root()
@@ -119,6 +130,21 @@ def get_user_tabs(ghub, tab=""):
                     ghub.context.prev_context.location + "/" + "star"
                 )
                 ghub.context.context = "stars"
+            else:
+                print("Error getting data - " + response.status_code)
+        elif tab == "followers" or tab == "following":
+            response = ghub.github.get(
+                ghub.api_url
+                + ghub.endpoints["users"]
+                + ghub.context.location
+                + "/"
+                + tab
+            )
+            if response.status_code == 200:
+                ghub.context = Context(prev_context=ghub.context)
+                ghub.context.cache = response.json()
+                ghub.context.location = ghub.context.prev_context.location + "/" + tab
+                ghub.context.context = tab
             else:
                 print("Error getting data - " + response.status_code)
     else:

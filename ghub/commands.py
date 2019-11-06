@@ -71,6 +71,15 @@ class CD(Command):
                             print("{} is not a directory.".format(args[0]))
                             return
                 print("{} does not exits.".format(args[0]))
+            elif (
+                ghub.context.context == "followers"
+                or ghub.context.context == "following"
+            ):
+                for i in ghub.context.cache:
+                    if i["login"] == args[0]:
+                        get_user(ghub, args[0])
+                        return
+                print("{} does not exits.".format(args[0]))
         elif len(args) == 2:
             if args[0] == "user":
                 get_user(ghub, args[1])
@@ -90,12 +99,15 @@ class LS(Command):
                 print(
                     i["name"] if not ghub.context.context == "stars" else i["full_name"]
                 )
-        if ghub.context.context == "repo":
+        elif ghub.context.context == "repo":
             for i in get_items_in_tree(ghub):
                 if i[1] == "tree":
                     print(colored(i[0], "green", attrs=["bold"]))
                 else:
                     print(i[0])
+        if ghub.context.context == "followers" or ghub.context.context == "following":
+            for i in ghub.context.cache:
+                print(i["login"])
 
 
 class EXIT(Command):
