@@ -74,7 +74,18 @@ def get_user_tabs(ghub, tab=""):
                 ghub.context.location = ghub.user["login"] + "/" + "repos"
                 ghub.context.context = "repos"
             else:
-                print("Error getting repo data - " + response.status_code)
+                print("Error getting data - " + response.status_code)
+        elif tab == "stars":
+            response = ghub.github.get(
+                ghub.api_url + ghub.endpoints["user"] + "/starred"
+            )
+            if response.status_code == 200:
+                ghub.context = Context(prev_context=ghub.context)
+                ghub.context.cache = response.json()
+                ghub.context.location = ghub.user["login"] + "/" + "stars"
+                ghub.context.context = "stars"
+            else:
+                print("Error getting data - " + response.status_code)
     elif ghub.context.context == "user":
         if tab == "":
             ghub.context.set_context_to_root()
@@ -93,7 +104,23 @@ def get_user_tabs(ghub, tab=""):
                 )
                 ghub.context.context = "repos"
             else:
-                print("Error getting repo data - " + response.status_code)
+                print("Error getting data - " + response.status_code)
+        elif tab == "stars":
+            response = ghub.github.get(
+                ghub.api_url
+                + ghub.endpoints["users"]
+                + ghub.context.location
+                + "/starred"
+            )
+            if response.status_code == 200:
+                ghub.context = Context(prev_context=ghub.context)
+                ghub.context.cache = response.json()
+                ghub.context.location = (
+                    ghub.context.prev_context.location + "/" + "star"
+                )
+                ghub.context.context = "stars"
+            else:
+                print("Error getting data - " + response.status_code)
     else:
         pass
 

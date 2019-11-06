@@ -43,8 +43,11 @@ class CD(Command):
                 ghub.context = ghub.context.prev_context
             elif ghub.context.context == "root" or ghub.context.context == "user":
                 get_user_tabs(ghub, args[0])
-            elif ghub.context.context == "repos":
-                repo = "{}/{}".format(ghub.context.location.split("/")[0], args[0])
+            elif ghub.context.context == "repos" or ghub.context.context == "stars":
+                if ghub.context.context == "repos":
+                    repo = "{}/{}".format(ghub.context.location.split("/")[0], args[0])
+                elif ghub.context.context == "stars":
+                    repo = "{}".format(args[0])
                 current_tree = get_tree(ghub, repo)
                 if not current_tree:
                     print("Location not found")
@@ -82,9 +85,11 @@ class LS(Command):
         self.setup("ls", "List everything in the current context")
 
     def __call__(self, args, ghub):
-        if ghub.context.context == "repos":
+        if ghub.context.context == "repos" or ghub.context.context == "stars":
             for i in ghub.context.cache:
-                print(i["name"])
+                print(
+                    i["name"] if not ghub.context.context == "stars" else i["full_name"]
+                )
         if ghub.context.context == "repo":
             for i in get_items_in_tree(ghub):
                 if i[1] == "tree":
