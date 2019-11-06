@@ -3,6 +3,7 @@ import os
 import json
 import webbrowser
 import stat
+from git import Repo
 
 from .context import Context
 
@@ -183,3 +184,17 @@ def get_blob(ghub, blob_url):
     if response.status_code == 200:
         return response.json()
     return False
+
+
+def clone_repo(ghub, dir, repo_name=None):
+    print("Preparing to clone...")
+    if repo_name == None:
+        repo_name = "/".join(ghub.context.location.split("/")[:2])
+    if dir[0] == "~":
+        dir = os.path.expanduser("~") + dir[1:]
+    dir = dir + "/" + repo_name.split("/")[1]
+    try:
+        Repo.clone_from("https://github.com/" + repo_name, dir)
+        print("{} cloned to {}".format(repo_name, dir))
+    except Exception as e:
+        print(e)

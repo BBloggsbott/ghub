@@ -2,7 +2,7 @@ import sys
 import os
 from termcolor import colored
 
-from .githubutils import authorize, get_user_tabs, get_tree, get_user
+from .githubutils import authorize, get_user_tabs, get_tree, get_user, clone_repo
 from .repoutils import get_items_in_tree, get_blob_content
 from .context import Context
 
@@ -83,6 +83,16 @@ class CD(Command):
         elif len(args) == 2:
             if args[0] == "user":
                 get_user(ghub, args[1])
+            if args[0] == "repo":
+                repo = args[1]
+                current_tree = get_tree(ghub, repo)
+                if not current_tree:
+                    print("Location not found")
+                    return
+                ghub.context = Context(prev_context=ghub.context)
+                ghub.context.context = "repo"
+                ghub.context.location = repo
+                ghub.context.cache = current_tree
         elif len(args) == 0:
             ghub.context.set_context_to_root()
         else:
@@ -164,3 +174,15 @@ class CAT(Command):
                 )
             )
             return False
+
+
+class CLONE(Command):
+    def __init__(self):
+        self.setup("clone", "Clone the repo", [0, 1, 2])
+
+    def __call__(self, args, ghub):
+        if len(args) == 1:
+            if ghub.context.context == "repo":
+                clone_repo(ghub, args[0])
+        elif len(args) == 2:
+            clone_repo(ghub, args[1], args[0])
