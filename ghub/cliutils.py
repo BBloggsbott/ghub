@@ -54,6 +54,16 @@ class Interpreter(object):
         """
         command = " ".join(i.strip() for i in command.split())
         command_name_verified, args_verified, command, args = self.verify(command)
+        if command == "help":
+            print(
+                "GHub lets you browse GitHub like it is unix.\nIt supports the following commands:\n{}\nFor command specific help, try {}".format(
+                    colored(
+                        "\n".join([i.name for i in self.registered_commands]), "green"
+                    ),
+                    colored("<command> help", "yellow"),
+                )
+            )
+            return
         if command_name_verified:
             if not args_verified:
                 print("Incorrect number of arguments.")

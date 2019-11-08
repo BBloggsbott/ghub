@@ -104,6 +104,10 @@ class LS(Command):
         self.setup("ls", "List everything in the current context")
 
     def __call__(self, args, ghub):
+        if ghub.context.context == "root" or ghub.context.context == "user":
+            print(
+                colored("repos\nstars\nfollowers\nfollowing", "green", attrs=["bold"])
+            )
         if ghub.context.context == "repos" or ghub.context.context == "stars":
             for i in ghub.context.cache:
                 print(
