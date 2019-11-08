@@ -13,7 +13,7 @@ class Context(object):
         self.context = "root"  # the current context
         self.location = user["login"]  # the current location in the GitHub tree
         self.root_location = user["login"]  # the root location
-        self.prev_context = None
+        self.prev_context = self
         self.cache = None
 
     def set_context_to_repo(self, username, reponame):
