@@ -32,6 +32,10 @@ class TestCommandsClass:
         cd(args, ghub)
         assert ghub.context.context == "repos"
         cd([".."], ghub)
+        args = ["repo", "BBloggsbott/ghub"]
+        cd(args, ghub)
+        assert ghub.context.context == "repo"
+        assert ghub.context.location == "BBloggsbott/ghub"
 
     def test_cd_stars(self):
         cd = CD()
@@ -77,7 +81,10 @@ class TestCommandsClass:
         cd(args, ghub)
         assert ghub.context.context == "following"
         assert ghub.context.location == "BBloggsbott/following"
-        args = [".."]
+        cd(["defunkt"], ghub)
+        assert ghub.context.context == "user"
+        assert ghub.context.location == "defunkt"
+        args = []
         cd(args, ghub)
         assert ghub.context.context == "root"
         cd(["user", "defunkt"], ghub)
