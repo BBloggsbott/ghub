@@ -16,10 +16,12 @@ def run_ghub():
     interpreter = Interpreter()
     print("Setup done.")
     while True:
-        command = input(
-            "ghub:{} {}> ".format(
+        print(
+            "ghub:{} {}>".format(
                 colored(ghub.context.context, "yellow"),
                 colored(ghub.context.location, "green"),
-            )
+            ),
+            end=" ",
         )
+        command = input()
         interpreter.execute(command, ghub)
