@@ -5,16 +5,39 @@ from termcolor import colored
 import colorama
 
 import os
+import sys
 
 
 def run_ghub():
     """Run GHub"""
     colorama.init()
-    print("Welcome to GHub - Browse GitHub like it is UNIX")
-    print("Starting initial setup...")
-    ghub = GHub()
+    if len(sys.argv) == 1:
+        print("Welcome to GHub - Browse GitHub like it is UNIX")
+        print("Starting initial setup...")
+        ghub = GHub()
+        interpreter = Interpreter()
+        print("Setup done.")
+        cli_runner(ghub, interpreter)
+    elif len(sys.argv) == 2:
+        ghub = GHub()
+        interpreter = Interpreter()
+        script_runner(sys.argv[1], ghub, interpreter)
+
+
+def script_runner(filename, ghub, interpreter):
+    try:
+        script_file = open(filename, "r")
+    except:
+        print("Error opening file {}".format(filename))
+        sys.exit(1)
+    command = script_file.readlines()
+    script_file.close()
     interpreter = Interpreter()
-    print("Setup done.")
+    for cmd in command:
+        interpreter.execute(cmd, ghub)
+
+
+def cli_runner(ghub, interpreter):
     while True:
         print(
             "ghub:{} {}>".format(
