@@ -1,6 +1,7 @@
 """Utilities to run GHub"""
 from .ghubutils import Context, GHub
 from .cliutils import Interpreter
+from ._version import __version__
 from termcolor import colored
 import colorama
 
@@ -19,8 +20,14 @@ def run_ghub():
         print("Setup done.")
         cli_runner(ghub, interpreter)
     elif len(sys.argv) == 2:
+        if sys.argv[1] == "--version" or sys.argv[1] == "-v":
+            print(__version__)
+            return
         ghub = GHub()
         interpreter = Interpreter()
+        if sys.argv[1] == "--help" or sys.argv[1] == "-h":
+            interpreter.execute("help", ghub)
+            return
         script_runner(sys.argv[1], ghub, interpreter)
 
 
