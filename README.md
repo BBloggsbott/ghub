@@ -1,7 +1,7 @@
 # ghub
 A Unix like CLI for GitHub. [![Build Status](https://travis-ci.org/BBloggsbott/ghub.svg?branch=master)](https://travis-ci.org/BBloggsbott/ghub)
 
-![GHub Demo](https://i.imgur.com/ToaaJsn.gif)
+![GHub Demo](https://i.imgur.com/okrCqsY.gif)
 
 For more instructions on setup and usage, check the wiki [here](https://github.com/BBloggsbott/ghub/wiki).
 
