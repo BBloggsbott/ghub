@@ -2,6 +2,7 @@
 from pathlib import Path
 from requests_oauthlib import OAuth2Session
 import json
+import sys
 
 from .githubutils import authorize
 from .context import Context
@@ -33,12 +34,24 @@ class GHub(object):
         self.auth_filename = "auth.json"  # Filename with OAuth info
         self.github = OAuth2Session(self.client_id)  # OAuth2Session for github
         self.oauth_data = ""  # Data from GitHub OAuth
-        authorize(self, reauthorize, fromenv)
-        self.user = json.loads(
-            self.github.get(self.api_url + self.endpoints["user"]).content.decode(
-                "utf-8"
+        try:
+            authorize(self, reauthorize, fromenv)
+        except:
+            print(
+                "Error performing Authorization. Delete ~/.ghub/auth.json and try again.\nQuiting GHub."
             )
-        )  # Info of the Authorized user
+            sys.exit(1)
+        try:
+            self.user = json.loads(
+                self.github.get(self.api_url + self.endpoints["user"]).content.decode(
+                    "utf-8"
+                )
+            )  # Info of the Authorized user
+        except:
+            print(
+                "Error getting user details. Check network connection and try again.\nQuiting GHub."
+            )
+            sys.exit(1)
         self.context = Context(user=self.user)
         self.print_auth_user()
 

@@ -50,7 +50,7 @@ class CD(Command):
                     repo = "{}".format(args[0])
                 current_tree = get_tree(ghub, repo)
                 if not current_tree:
-                    print("Location not found")
+                    print("Repo not found")
                     return
                 ghub.context = Context(prev_context=ghub.context)
                 ghub.context.context = "repo"
@@ -79,7 +79,7 @@ class CD(Command):
                     if i["login"] == args[0]:
                         get_user(ghub, args[0])
                         return
-                print("{} does not exits.".format(args[0]))
+                print("{} does not exist.".format(args[0]))
         elif len(args) == 2:
             if args[0] == "user":
                 get_user(ghub, args[1])

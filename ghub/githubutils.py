@@ -3,6 +3,7 @@ import os
 import json
 import webbrowser
 import stat
+import sys
 from git import Repo
 
 from .context import Context
@@ -29,11 +30,17 @@ def authorize(ghub, reauthorize=False, fromenv=False):
         redirect_response = input(
             "Please enter the URL you were redirected to after granting access: "
         )
-        response = ghub.github.fetch_token(
-            token_url,
-            client_secret=ghub.client_secret,
-            authorization_response=redirect_response,
-        )
+        try:
+            response = ghub.github.fetch_token(
+                token_url,
+                client_secret=ghub.client_secret,
+                authorization_response=redirect_response,
+            )
+        except:
+            print(
+                "Network Error. Make sure you have a working internet connection and try again."
+            )
+            sys.exit(1)
         if not os.path.isdir(ghub.data_path):
             os.makedirs(ghub.data_path)
         data_file = open(ghub.data_path / ghub.auth_filename, "w+")
@@ -64,6 +71,10 @@ def get_user(ghub, user):
 
 
 def get_user_tabs(ghub, tab=""):
+    tabs = ["repos", "stars", "followers", "following"]
+    if tab not in tabs:
+        print("{} is not a valid user tab".format(tab))
+        return
     if ghub.context.context == "root":
         if tab == "":
             ghub.context.set_context_to_root()
