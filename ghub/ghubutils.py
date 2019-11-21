@@ -38,9 +38,9 @@ class GHub(object):
             authorize(self, reauthorize, fromenv)
         except:
             print(
-                "Error performing Authorization. Delete ~/.ghub/auth.json and try again.\nQuiting GHub."
+                "Error performing Authorization from existing credentials. Restarting Authorization procedure."
             )
-            sys.exit(1)
+            authorize(self, reauthorize=True)
         try:
             self.user = json.loads(
                 self.github.get(self.api_url + self.endpoints["user"]).content.decode(
