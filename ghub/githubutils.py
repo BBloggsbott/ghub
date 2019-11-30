@@ -30,17 +30,18 @@ def authorize(ghub, reauthorize=False, fromenv=False):
         redirect_response = input(
             "Please enter the URL you were redirected to after granting access: "
         )
-        try:
-            response = ghub.github.fetch_token(
-                token_url,
-                client_secret=ghub.client_secret,
-                authorization_response=redirect_response,
-            )
-        except:
-            print(
-                "Network Error. Make sure you have a working internet connection and try again."
-            )
-            sys.exit(1)
+        # try:
+        response = ghub.github.fetch_token(
+            token_url,
+            client_secret=ghub.client_secret,
+            authorization_response=redirect_response,
+        )
+        # except Exception as e:
+        #    print(e)
+        #    print(
+        #        "Network Error. Make sure you have a working internet connection and try again."
+        #    )
+        #    sys.exit(1)
         if not os.path.isdir(ghub.data_path):
             os.makedirs(ghub.data_path)
         data_file = open(ghub.data_path / ghub.auth_filename, "w+")
@@ -71,7 +72,7 @@ def get_user(ghub, user):
 
 
 def get_user_tabs(ghub, tab=""):
-    tabs = ["repos", "stars", "followers", "following"]
+    tabs = ["repos", "stars", "followers", "following", "notifications"]
     if tab not in tabs:
         print("{} is not a valid user tab".format(tab))
         return
@@ -102,6 +103,15 @@ def get_user_tabs(ghub, tab=""):
             response = ghub.github.get(
                 ghub.api_url + ghub.endpoints["user"] + "/" + tab
             )
+            if response.status_code == 200:
+                ghub.context = Context(prev_context=ghub.context)
+                ghub.context.cache = response.json()
+                ghub.context.location = ghub.user["login"] + "/" + tab
+                ghub.context.context = tab
+            else:
+                print("Error getting data - " + response.status_code)
+        elif tab == "notifications":
+            response = ghub.github.get(ghub.api_url + ghub.endpoints["notifications"])
             if response.status_code == 200:
                 ghub.context = Context(prev_context=ghub.context)
                 ghub.context.cache = response.json()
@@ -209,3 +219,35 @@ def clone_repo(ghub, dir, repo_name=None):
         print("{} cloned to {}".format(repo_name, dir))
     except Exception as e:
         print(e)
+
+
+def star_repo(ghub, repo_name=None):
+    print("Starring repo...")
+    if repo_name == None:
+        repo_name = ghub.context.location
+    star_url = ghub.api_url + ghub.endpoints["user"] + "/" + "starred/" + repo_name
+    response = ghub.github.get(star_url)
+    if response.status_code == 204:
+        print("Repo is already starred.")
+    elif response.status_code == 404:
+        resp = ghub.github.put(star_url)
+        if resp.status_code == 204:
+            print("{} starred".format(repo_name))
+        else:
+            print("Error starring repo")
+
+
+def unstar_repo(ghub, repo_name=None):
+    print("Unstarring repo...")
+    if repo_name == None:
+        repo_name = ghub.context.location
+    star_url = ghub.api_url + ghub.endpoints["user"] + "/" + "starred/" + repo_name
+    response = ghub.github.get(star_url)
+    if response.status_code == 204:
+        resp = ghub.github.delete(star_url)
+        if resp.status_code == 204:
+            print("{} unstarred".format(repo_name))
+        else:
+            print("Error unstarring repo")
+    elif response.status_code == 404:
+        print("Repo is not starred.")

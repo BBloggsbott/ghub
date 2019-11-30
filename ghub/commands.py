@@ -2,7 +2,15 @@ import sys
 import os
 from termcolor import colored
 
-from .githubutils import authorize, get_user_tabs, get_tree, get_user, clone_repo
+from .githubutils import (
+    authorize,
+    get_user_tabs,
+    get_tree,
+    get_user,
+    clone_repo,
+    star_repo,
+    unstar_repo,
+)
 from .repoutils import get_items_in_tree, get_blob_content
 from .context import Context
 
@@ -122,6 +130,19 @@ class LS(Command):
         if ghub.context.context == "followers" or ghub.context.context == "following":
             for i in ghub.context.cache:
                 print(i["login"])
+        if ghub.context.context == "notifications":
+            for i in ghub.context.cache:
+                print(
+                    "{}\n\t{}".format(
+                        colored(
+                            i["repository"]["owner"]["login"]
+                            + "/"
+                            + i["repository"]["name"],
+                            "yellow",
+                        ),
+                        i["subject"]["title"],
+                    )
+                )
 
 
 class EXIT(Command):
@@ -190,3 +211,31 @@ class CLONE(Command):
                 clone_repo(ghub, args[0])
         elif len(args) == 2:
             clone_repo(ghub, args[1], args[0])
+
+
+class STAR(Command):
+    def __init__(self):
+        self.setup("star", "Star the repo")
+
+    def __call__(self, args, ghub):
+        if len(args) == 0:
+            if ghub.context.context == "repo":
+                star_repo(ghub)
+            else:
+                print("Not in repo context.")
+        elif len(args) == 1:
+            star_repo(ghub, args[0])
+
+
+class UNSTAR(Command):
+    def __init__(self):
+        self.setup("unstar", "Unstar the repo")
+
+    def __call__(self, args, ghub):
+        if len(args) == 0:
+            if ghub.context.context == "repo":
+                unstar_repo(ghub)
+            else:
+                print("Not in repo context.")
+        elif len(args) == 1:
+            unstar_repo(ghub, args[0])
