@@ -6,7 +6,7 @@ from ghub.ghubutils import GHub
 class TestInterpreterClass:
     def test_intialization(self):
         interpreter = Interpreter()
-        assert len(interpreter.registered_commands) == 9
+        assert len(interpreter.registered_commands) == 11
 
     def test_register(self):
         interpreter = Interpreter()

@@ -251,3 +251,35 @@ def unstar_repo(ghub, repo_name=None):
             print("Error unstarring repo")
     elif response.status_code == 404:
         print("Repo is not starred.")
+
+
+def watch_repo(ghub, repo_name=None):
+    print("Subscribing to repo...")
+    if repo_name == None:
+        repo_name = ghub.context.location
+    watch_url = ghub.api_url + ghub.endpoints["repos"] + repo_name + "/subscription"
+    response = ghub.github.get(watch_url)
+    if response.status_code == 200:
+        print("You are already watching this repo.")
+    elif response.status_code == 404:
+        resp = ghub.github.put(watch_url)
+        if resp.status_code == 200:
+            print("Watching {}".format(repo_name))
+        else:
+            print("Error subscribing to repo")
+
+
+def unwatch_repo(ghub, repo_name=None):
+    print("Unsubscribing repo...")
+    if repo_name == None:
+        repo_name = ghub.context.location
+    watch_url = ghub.api_url + ghub.endpoints["repos"] + repo_name + "/subscription"
+    response = ghub.github.get(watch_url)
+    if response.status_code == 200:
+        resp = ghub.github.delete(watch_url)
+        if resp.status_code == 204:
+            print("{} unsubscribed".format(repo_name))
+        else:
+            print("Error unsubscribing to repo")
+    elif response.status_code == 404:
+        print("You are not watching this repo.")

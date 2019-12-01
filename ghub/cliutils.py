@@ -6,7 +6,19 @@ from termcolor import colored
 from .githubutils import authorize, get_user_tabs, get_tree
 from .repoutils import get_items_in_tree, get_blob_content
 from .context import Context
-from .commands import REAUTHORIZE, EXIT, CD, LS, CLEAR, CAT, CLONE, STAR, UNSTAR
+from .commands import (
+    REAUTHORIZE,
+    EXIT,
+    CD,
+    LS,
+    CLEAR,
+    CAT,
+    CLONE,
+    STAR,
+    UNSTAR,
+    WATCH,
+    UNWATCH,
+)
 
 
 class Interpreter(object):
@@ -25,6 +37,8 @@ class Interpreter(object):
         self.register(CLONE())
         self.register(STAR())
         self.register(UNSTAR())
+        self.register(WATCH())
+        self.register(UNWATCH())
 
     def register(self, cmd):
         self.registered_commands.append(cmd)

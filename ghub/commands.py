@@ -10,6 +10,8 @@ from .githubutils import (
     clone_repo,
     star_repo,
     unstar_repo,
+    watch_repo,
+    unwatch_repo,
 )
 from .repoutils import get_items_in_tree, get_blob_content
 from .context import Context
@@ -239,3 +241,31 @@ class UNSTAR(Command):
                 print("Not in repo context.")
         elif len(args) == 1:
             unstar_repo(ghub, args[0])
+
+
+class WATCH(Command):
+    def __init__(self):
+        self.setup("watch", "Watch a repo")
+
+    def __call__(self, args, ghub):
+        if len(args) == 0:
+            if ghub.context.context == "repo":
+                watch_repo(ghub)
+            else:
+                print("Not in repo context.")
+        elif len(args) == 1:
+            watch_repo(ghub, args[0])
+
+
+class UNWATCH(Command):
+    def __init__(self):
+        self.setup("unwatch", "Unwatch a repo")
+
+    def __call__(self, args, ghub):
+        if len(args) == 0:
+            if ghub.context.context == "repo":
+                unwatch_repo(ghub)
+            else:
+                print("Not in repo context.")
+        elif len(args) == 1:
+            unwatch_repo(ghub, args[0])

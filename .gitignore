@@ -1,3 +1,4 @@
+*.ghub
 key.sh
 .vscode/
 # Byte-compiled / optimized / DLL files
