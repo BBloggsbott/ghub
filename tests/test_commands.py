@@ -1,4 +1,15 @@
-from ghub.commands import REAUTHORIZE, EXIT, CD, LS, CLEAR, CAT
+from ghub.commands import (
+    REAUTHORIZE,
+    EXIT,
+    CD,
+    LS,
+    CLEAR,
+    CAT,
+    STAR,
+    UNSTAR,
+    WATCH,
+    UNWATCH,
+)
 from ghub.ghubutils import GHub
 
 
@@ -111,3 +122,96 @@ class TestCommandsClass:
         assert not res
         res = cat(["requirements.txt"], ghub)
         assert res
+
+    def test_star_unstar(self):
+        cd = CD()
+        star = STAR()
+        unstar = UNSTAR()
+        ghub = GHub(fromenv=True)
+        cd(["repos"], ghub)
+        cd(["ghub"], ghub)
+        star_url = (
+            ghub.api_url
+            + ghub.endpoints["user"]
+            + "/"
+            + "starred/"
+            + "BBloggsbott/ghub"
+        )
+        response = ghub.github.get(star_url)
+        starred = False
+        if response.status_code == 204:
+            starred = True
+            unstar([], ghub)
+        response = ghub.github.get(star_url)
+        assert response.status_code == 404
+        star([], ghub)
+        response = ghub.github.get(star_url)
+        assert response.status_code == 204
+        unstar([], ghub)
+        response = ghub.github.get(star_url)
+        assert response.status_code == 404
+        if starred:
+            star([], ghub)
+        repo_name = "BBloggsbott/ghub"
+        star_url = ghub.api_url + ghub.endpoints["user"] + "/" + "starred/" + repo_name
+        response = ghub.github.get(star_url)
+        starred = False
+        if response.status_code == 204:
+            starred = True
+            unstar([repo_name], ghub)
+        response = ghub.github.get(star_url)
+        assert response.status_code == 404
+        star([repo_name], ghub)
+        response = ghub.github.get(star_url)
+        assert response.status_code == 204
+        unstar([repo_name], ghub)
+        response = ghub.github.get(star_url)
+        assert response.status_code == 404
+        if starred:
+            star([repo_name], ghub)
+
+    def test_watch_unwatch(self):
+        cd = CD()
+        watch = WATCH()
+        unwatch = UNWATCH()
+        ghub = GHub(fromenv=True)
+        cd(["repos"], ghub)
+        cd(["ghub"], ghub)
+        watch_url = (
+            ghub.api_url
+            + ghub.endpoints["repos"]
+            + "BBloggsbott/ghub"
+            + "/subscription"
+        )
+        response = ghub.github.get(watch_url)
+        watching = False
+        if response.status_code == 200:
+            watching = True
+            unwatch([], ghub)
+        response = ghub.github.get(watch_url)
+        assert response.status_code == 404
+        watch([], ghub)
+        response = ghub.github.get(watch_url)
+        assert response.status_code == 200
+        unwatch([], ghub)
+        response = ghub.github.get(watch_url)
+        assert response.status_code == 404
+        if watching:
+            watch([], ghub)
+        repo_name = "BBloggsbott/ghub"
+        watch_url = ghub.api_url + ghub.endpoints["repos"] + repo_name + "/subscription"
+        response = ghub.github.get(watch_url)
+        watching = False
+        if response.status_code == 200:
+            watching = True
+            unwatch([repo_name], ghub)
+        response = ghub.github.get(watch_url)
+        assert response.status_code == 404
+        watch([repo_name], ghub)
+        response = ghub.github.get(watch_url)
+        assert response.status_code == 200
+        unwatch([repo_name], ghub)
+        response = ghub.github.get(watch_url)
+        assert response.status_code == 404
+        if watching:
+            watch([repo_name], ghub)
