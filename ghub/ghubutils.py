@@ -18,6 +18,7 @@ class GHub(object):
         "user": "user",
         "repos": "repos/",
         "notifications": "notifications",
+        "orgs": "orgs/",
     }  # Endpoints for GitHub API
     client_id = "ad1ef4c67333561cc9ea"  # client ID for GitHub's OAuth
     client_secret = (
@@ -40,13 +41,13 @@ class GHub(object):
             self.client_id, scope=scopes
         )  # OAuth2Session for github
         self.oauth_data = ""  # Data from GitHub OAuth
-        # try:
-        authorize(self, reauthorize, fromenv)
-        # except:
-        #    print(
-        #        "Error performing Authorization from existing credentials. Restarting Authorization procedure."
-        #    )
-        #    authorize(self, reauthorize=True)
+        try:
+            authorize(self, reauthorize, fromenv)
+        except:
+            print(
+                "Error performing Authorization from existing credentials. Restarting Authorization procedure."
+            )
+            authorize(self, reauthorize=True)
         try:
             self.user = json.loads(
                 self.github.get(self.api_url + self.endpoints["user"]).content.decode(

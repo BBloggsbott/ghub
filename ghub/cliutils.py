@@ -18,6 +18,7 @@ from .commands import (
     UNSTAR,
     WATCH,
     UNWATCH,
+    FORK,
 )
 
 
@@ -39,6 +40,7 @@ class Interpreter(object):
         self.register(UNSTAR())
         self.register(WATCH())
         self.register(UNWATCH())
+        self.register(FORK())
 
     def register(self, cmd):
         self.registered_commands.append(cmd)

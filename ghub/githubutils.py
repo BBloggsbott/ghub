@@ -30,18 +30,18 @@ def authorize(ghub, reauthorize=False, fromenv=False):
         redirect_response = input(
             "Please enter the URL you were redirected to after granting access: "
         )
-        # try:
-        response = ghub.github.fetch_token(
-            token_url,
-            client_secret=ghub.client_secret,
-            authorization_response=redirect_response,
-        )
-        # except Exception as e:
-        #    print(e)
-        #    print(
-        #        "Network Error. Make sure you have a working internet connection and try again."
-        #    )
-        #    sys.exit(1)
+        try:
+            response = ghub.github.fetch_token(
+                token_url,
+                client_secret=ghub.client_secret,
+                authorization_response=redirect_response,
+            )
+        except Exception as e:
+            print(e)
+            print(
+                "Network Error. Make sure you have a working internet connection and try again."
+            )
+            sys.exit(1)
         if not os.path.isdir(ghub.data_path):
             os.makedirs(ghub.data_path)
         data_file = open(ghub.data_path / ghub.auth_filename, "w+")
@@ -66,6 +66,18 @@ def get_user(ghub, user):
         ghub.context = Context(prev_context=ghub.context)
         ghub.context.context = "user"
         ghub.context.location = user
+        ghub.context.cache = response.json()
+        return True
+    return False
+
+
+def get_org(ghub, org):
+    url = ghub.api_url + ghub.endpoints["orgs"] + org
+    response = ghub.github.get(url)
+    if response.status_code == 200:
+        ghub.context = Context(prev_context=ghub.context)
+        ghub.context.context = "org"
+        ghub.context.location = org
         ghub.context.cache = response.json()
         return True
     return False
@@ -119,16 +131,25 @@ def get_user_tabs(ghub, tab=""):
                 ghub.context.context = tab
             else:
                 print("Error getting data - " + response.status_code)
-    elif ghub.context.context == "user":
+    elif ghub.context.context == "user" or ghub.context.context == "org":
         if tab == "":
             ghub.context.set_context_to_root()
         elif tab == "repos":
-            response = ghub.github.get(
-                ghub.api_url
-                + ghub.endpoints["users"]
-                + ghub.context.location
-                + "/repos"
-            )
+            if ghub.context.context == "user":
+                url = (
+                    ghub.api_url
+                    + ghub.endpoints["users"]
+                    + ghub.context.location
+                    + "/repos"
+                )
+            else:
+                url = (
+                    ghub.api_url
+                    + ghub.endpoints["orgs"]
+                    + ghub.context.location
+                    + "/repos"
+                )
+            response = ghub.github.get(url)
             if response.status_code == 200:
                 ghub.context = Context(prev_context=ghub.context)
                 ghub.context.cache = response.json()
@@ -283,3 +304,36 @@ def unwatch_repo(ghub, repo_name=None):
             print("Error unsubscribing to repo")
     elif response.status_code == 404:
         print("You are not watching this repo.")
+
+
+def fork_repo(ghub, repo_name=None):
+    print("Forking Repo...")
+    if repo_name == None:
+        repo_name = ghub.context.location.split("/")
+        repo_name = "/".join(repo_name[:2])
+    true_repo_name = repo_name.split("/")[1]
+    forked_url = (
+        ghub.api_url
+        + ghub.endpoints["repos"]
+        + ghub.get_user_username()
+        + "/"
+        + true_repo_name
+    )
+    response = ghub.github.get(forked_url)
+    if response.status_code == 200:
+        print("Cannot fork. Repo Already Exists.")
+        return False
+    print("Repo is being forked. Please wait for it to complete.", end="")
+    response = ghub.github.post(
+        ghub.api_url + ghub.endpoints["repos"] + repo_name + "/forks"
+    )
+    if response.status_code == 202:
+        print(
+            "\nForking complete. Forked repo to {}".format(
+                ghub.get_user_username() + "/" + true_repo_name
+            )
+        )
+        return True
+    else:
+        print("Error while trying fork.")
+        return False

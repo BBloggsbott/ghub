@@ -7,11 +7,13 @@ from .githubutils import (
     get_user_tabs,
     get_tree,
     get_user,
+    get_org,
     clone_repo,
     star_repo,
     unstar_repo,
     watch_repo,
     unwatch_repo,
+    fork_repo,
 )
 from .repoutils import get_items_in_tree, get_blob_content
 from .context import Context
@@ -51,7 +53,11 @@ class CD(Command):
         if len(args) == 1:
             if args[0] == "..":
                 ghub.context = ghub.context.prev_context
-            elif ghub.context.context == "root" or ghub.context.context == "user":
+            elif (
+                ghub.context.context == "root"
+                or ghub.context.context == "user"
+                or ghub.context.context == "org"
+            ):
                 get_user_tabs(ghub, args[0])
             elif ghub.context.context == "repos" or ghub.context.context == "stars":
                 if ghub.context.context == "repos":
@@ -93,7 +99,7 @@ class CD(Command):
         elif len(args) == 2:
             if args[0] == "user":
                 get_user(ghub, args[1])
-            if args[0] == "repo":
+            elif args[0] == "repo":
                 repo = args[1]
                 current_tree = get_tree(ghub, repo)
                 if not current_tree:
@@ -103,6 +109,8 @@ class CD(Command):
                 ghub.context.context = "repo"
                 ghub.context.location = repo
                 ghub.context.cache = current_tree
+            elif args[0] == "org":
+                get_org(ghub, args[1])
         elif len(args) == 0:
             ghub.context.set_context_to_root()
         else:
@@ -114,7 +122,11 @@ class LS(Command):
         self.setup("ls", "List everything in the current context")
 
     def __call__(self, args, ghub):
-        if ghub.context.context == "root" or ghub.context.context == "user":
+        if (
+            ghub.context.context == "root"
+            or ghub.context.context == "user"
+            or ghub.context.context == "org"
+        ):
             if ghub.context.context == "root":
                 out = "repos\nstars\nfollowers\nfollowing\nnotifications"
             else:
@@ -271,3 +283,17 @@ class UNWATCH(Command):
                 print("Not in repo context.")
         elif len(args) == 1:
             unwatch_repo(ghub, args[0])
+
+
+class FORK(Command):
+    def __init__(self):
+        self.setup("fork", "fork a repo")
+
+    def __call__(self, args, ghub):
+        if len(args) == 0:
+            if ghub.context.context == "repo":
+                fork_repo(ghub)
+            else:
+                print("Not in repo context.")
+        elif len(args) == 1:
+            fork_repo(ghub, args[0])
