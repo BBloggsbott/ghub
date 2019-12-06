@@ -238,8 +238,10 @@ def clone_repo(ghub, dir, repo_name=None):
     try:
         Repo.clone_from("https://github.com/" + repo_name, dir)
         print("{} cloned to {}".format(repo_name, dir))
+        return True
     except Exception as e:
         print(e)
+        return False
 
 
 def star_repo(ghub, repo_name=None):

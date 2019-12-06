@@ -26,6 +26,10 @@ class TestGitHubUtils:
         assert ghub.context.context == "followers"
         assert ghub.context.location == "BBloggsbott/followers"
         ghub.context = ghub.context.prev_context
+        githubutils.get_user_tabs(ghub, "notifications")
+        assert ghub.context.context == "notifications"
+        assert ghub.context.location == "BBloggsbott/notifications"
+        ghub.context = ghub.context.prev_context
 
     def test_latest_commit(self):
         ghub = GHub(fromenv=True)
@@ -41,3 +45,13 @@ class TestGitHubUtils:
         ghub = GHub(fromenv=True)
         res = githubutils.get_user(ghub, "BBloggsbott")
         assert res != False
+
+    def test_clone_repo(self):
+        ghub = GHub(fromenv=True)
+        res = githubutils.clone_repo(ghub, "~/gitClones", "BBloggsbott/ghub")
+        assert res
+
+    def test_fork_repo(self):
+        ghub = GHub(fromenv=True)
+        res = githubutils.fork_repo(ghub, "BBloggsbott/ghub")
+        assert res == False
