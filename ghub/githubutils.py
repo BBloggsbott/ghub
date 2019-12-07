@@ -353,3 +353,27 @@ def get_prs(ghub, repo_name=None):
         ghub.context.cache = response.json()
         return True
     return False
+
+
+def get_pr(ghub, pr_no):
+    if not pr_no.isdigit():
+        print("Invalid PR number")
+        return False
+    repo_name = "/".join(ghub.context.location.split("/")[:2])
+    pr_url = ghub.api_url + ghub.endpoints["repos"] + repo_name + "/pulls/" + pr_no
+    response = ghub.github.get(pr_url)
+    if response.status_code == 200:
+        ghub.context = Context(prev_context=ghub.context)
+        ghub.context.context = "pull_request"
+        ghub.context.location = repo_name + "/pull_requests/" + pr_no
+        ghub.context.cache = response.json()
+        return True
+    elif response.status_code == 404:
+        print("No Active PR found with PR number {}".format(pr_no))
+    return False
+
+
+def get_pr_info(ghub, info_type="comments"):
+    info_url = ghub.context.cache["_links"][info_type]["href"]
+    response = ghub.github.get(info_url)
+    return response.json(), response.status_code

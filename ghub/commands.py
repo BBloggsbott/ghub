@@ -15,6 +15,8 @@ from .githubutils import (
     unwatch_repo,
     fork_repo,
     get_prs,
+    get_pr,
+    get_pr_info,
 )
 from .repoutils import get_items_in_tree, get_blob_content
 from .context import Context
@@ -100,6 +102,8 @@ class CD(Command):
                         get_user(ghub, args[0])
                         return
                 print("{} does not exist.".format(args[0]))
+            elif ghub.context.context == "pull_requests":
+                get_pr(ghub, args[0])
         elif len(args) == 2:
             if args[0] == "user":
                 get_user(ghub, args[1])
@@ -215,6 +219,47 @@ class CAT(Command):
                         return False
             print("{} does not exits.".format(args[0]))
             return False
+        elif ghub.context.context == "pull_request":
+            if len(args) == 0:
+                pr = ghub.context.cache
+                print(colored(pr["title"], "green"))
+                print(
+                    "{} wants to merge {} to {}".format(
+                        pr["user"]["login"], pr["head"]["label"], pr["base"]["label"]
+                    )
+                )
+                print("About:\n{}".format(pr["body"]))
+            elif len(args) == 1:
+                if args[0] == "comments":
+                    pr = ghub.context.cache
+                    content, code = get_pr_info(ghub)
+                    if code == 200:
+                        for i in content:
+                            owner = (
+                                i["author_association"] == "OWNER"
+                                or i["author_association"] == "MEMBER"
+                            )
+                            color = "green" if owner else "yellow"
+                            print(
+                                "{}: {}".format(
+                                    colored(i["user"]["login"], color), i["body"]
+                                )
+                            )
+                    else:
+                        print("Error fetching the comments")
+                elif args[0] == "commits":
+                    pr = ghub.context.cache
+                    content, code = get_pr_info(ghub, "commits")
+                    if code == 200:
+                        for i in content:
+                            print(
+                                "{} by {}".format(
+                                    colored(i["commit"]["message"], "yellow"),
+                                    colored(i["committer"]["login"], "green"),
+                                )
+                            )
+                    else:
+                        print("Error fetching the commits")
         else:
             print(
                 "This command only works in the {} context".format(
