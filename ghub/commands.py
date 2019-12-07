@@ -14,6 +14,7 @@ from .githubutils import (
     watch_repo,
     unwatch_repo,
     fork_repo,
+    get_prs,
 )
 from .repoutils import get_items_in_tree, get_blob_content
 from .context import Context
@@ -73,6 +74,9 @@ class CD(Command):
                 ghub.context.location = repo
                 ghub.context.cache = current_tree
             elif ghub.context.context == "repo":
+                if args[0] == "pull_requests":
+                    get_prs(ghub)
+                    return
                 for i in ghub.context.cache["tree"]:
                     if i["path"] == args[0]:
                         if i["type"] == "tree":
@@ -143,10 +147,10 @@ class LS(Command):
                     print(colored(i[0], "green", attrs=["bold"]))
                 else:
                     print(i[0])
-        if ghub.context.context == "followers" or ghub.context.context == "following":
+        elif ghub.context.context == "followers" or ghub.context.context == "following":
             for i in ghub.context.cache:
                 print(i["login"])
-        if ghub.context.context == "notifications":
+        elif ghub.context.context == "notifications":
             for i in ghub.context.cache:
                 print(
                     "{}\n\t{}".format(
@@ -159,6 +163,9 @@ class LS(Command):
                         i["subject"]["title"],
                     )
                 )
+        elif ghub.context.context == "pull_requests":
+            for i in ghub.context.cache:
+                print("{} : {}".format(colored(i["number"], "yellow"), i["title"]))
 
 
 class EXIT(Command):

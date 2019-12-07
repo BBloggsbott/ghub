@@ -339,3 +339,17 @@ def fork_repo(ghub, repo_name=None):
     else:
         print("Error while trying fork.")
         return False
+
+
+def get_prs(ghub, repo_name=None):
+    if repo_name == None:
+        repo_name = "/".join(ghub.context.location.split("/")[:2])
+    pr_url = ghub.api_url + ghub.endpoints["repos"] + repo_name + "/pulls"
+    response = ghub.github.get(pr_url)
+    if response.status_code == 200:
+        ghub.context = Context(prev_context=ghub.context)
+        ghub.context.context = "pull_requests"
+        ghub.context.location = repo_name + "/pull_requests"
+        ghub.context.cache = response.json()
+        return True
+    return False
