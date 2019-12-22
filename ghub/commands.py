@@ -137,7 +137,7 @@ class CD(Command):
 class LS(Command):
     def __init__(self):
         self.setup("ls", "List everything in the current context")
-        self.default_repo_items = ["pull_requests"]
+        self.default_repo_items = ["pull_requests", "issues"]
 
     def __call__(self, args, ghub):
         if (
@@ -181,6 +181,9 @@ class LS(Command):
                     )
                 )
         elif ghub.context.context == "pull_requests":
+            for i in ghub.context.cache:
+                print("{} : {}".format(colored(i["number"], "yellow"), i["title"]))
+        elif ghub.context.context == "issues":
             for i in ghub.context.cache:
                 print("{} : {}".format(colored(i["number"], "yellow"), i["title"]))
 
