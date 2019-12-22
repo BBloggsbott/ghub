@@ -8,6 +8,88 @@ from git import Repo
 
 from .context import Context
 
+event_dict = {
+    "added_to_project": (
+        lambda event: "{} added the issue to a project.".format(event["actor"]["login"])
+    ),
+    "assigned": (
+        lambda event: "{} assigned the issue to {}.".format(
+            event["actor"]["login"], event["assignee"]["login"]
+        )
+    ),
+    "closed": (lambda event: "{} closed this issue.".format(event["actor"]["login"])),
+    "converted_note_to_issue": (
+        lambda event: "{} created this issue from a note.".format(
+            event["actor"]["login"]
+        )
+    ),
+    "demilestoned": (lambda event: "The issue was removed from a milestone."),
+    "head_ref_deleted": (lambda event: "The pull request's branch was deleted."),
+    "head_ref_restored": (lambda event: "The pull request's branch was restored."),
+    "labelled": (
+        lambda event: "{} added {} label to the issue.".format(
+            event["actor"]["login"], event["label"]
+        )
+    ),
+    "locked": (
+        lambda event: "The issue was locked by {}.".format(event["actor"]["login"])
+    ),
+    "mentioned": (
+        lambda event: "{} was mentioned in the issue's body.".format(
+            event["actor"]["login"]
+        )
+    ),
+    "marked_as_duplicate": (
+        lambda event: "The issue was marked duplicate by {}.".format(
+            event["actor"]["login"]
+        )
+    ),
+    "merged": (
+        lambda event: "The issue was merged by {}.".format(event["actor"]["login"])
+    ),
+    "milestoned": (lambda event: "The issue was added to a milestone."),
+    "moved_columns_in_project": (
+        lambda event: "The issue was moved between columns in a project board."
+    ),
+    "referenced": (lambda event: "The issue was referenced from a commit message."),
+    "renamed": (lambda event: "The title of the issue was changed."),
+    "reopened": (
+        lambda event: "The issue was reopened by {}".format(event["actor"]["login"])
+    ),
+    "review_dismissed": (
+        lambda event: "{} dismissed a review from the pull request.".format(
+            event["actor"]["login"]
+        )
+    ),
+    "review_requested": (
+        lambda event: "{} requested review from the subject on this pull request.".format(
+            event["actor"]["login"]
+        )
+    ),
+    "review_request_removed": (
+        lambda event: "{} removed the review request for the subject on this pull request.".format(
+            event["actor"]["login"]
+        )
+    ),
+    "subscribed": (
+        lambda event: "{} subscribed to receive notifications for the issue.".format(
+            event["actor"]["login"]
+        )
+    ),
+    "transferred": (lambda event: "The issue was transferred to another repository."),
+    "unassigned": (
+        lambda event: "{} was unassigned from the issue.".format(
+            event["actor"]["login"]
+        )
+    ),
+    "unlabeled": (lambda event: "A label was removed from the issue."),
+    "unlocked": (
+        lambda event: "The issue was unlocked by {}".format(event["actor"]["login"])
+    ),
+    "unmarked_as_duplicate": (lambda event: "The was unmarked as dublicate."),
+    "user_blocked": (lambda event: "A user was blocked from the organization."),
+}
+
 
 def authorize(ghub, reauthorize=False, fromenv=False):
     """Authorize a user for GHub
@@ -369,11 +451,51 @@ def get_pr(ghub, pr_no):
         ghub.context.cache = response.json()
         return True
     elif response.status_code == 404:
-        print("No Active PR found with PR number {}".format(pr_no))
+        print("No PR found with PR number {}".format(pr_no))
     return False
 
 
 def get_pr_info(ghub, info_type="comments"):
     info_url = ghub.context.cache["_links"][info_type]["href"]
+    response = ghub.github.get(info_url)
+    return response.json(), response.status_code
+
+
+def get_issues(ghub, repo_name=None):
+    if repo_name == None:
+        repo_name = "/".join(ghub.context.location.split("/")[:2])
+    issue_url = ghub.api_url + ghub.endpoints["repos"] + repo_name + "/issues"
+    response = ghub.github.get(issue_url)
+    if response.status_code == 200:
+        ghub.context = Context(prev_context=ghub.context)
+        ghub.context.context = "issues"
+        ghub.context.location = repo_name + "/issues"
+        ghub.context.cache = response.json()
+        return True
+    return False
+
+
+def get_issue(ghub, issue_no):
+    if not issue_no.isdigit():
+        print("Invalid issue number")
+        return False
+    repo_name = "/".join(ghub.context.location.split("/")[:2])
+    issue_url = (
+        ghub.api_url + ghub.endpoints["repos"] + repo_name + "/issues/" + issue_no
+    )
+    response = ghub.github.get(issue_url)
+    if response.status_code == 200:
+        ghub.context = Context(prev_context=ghub.context)
+        ghub.context.context = "issue"
+        ghub.context.location = repo_name + "/issues/" + issue_no
+        ghub.context.cache = response.json()
+        return True
+    elif response.status_code == 404:
+        print("No issue found with issue number {}".format(issue_no))
+    return False
+
+
+def get_issue_info(ghub, info_type="comments"):
+    info_url = ghub.context.cache["{}_url".format(info_type)]
     response = ghub.github.get(info_url)
     return response.json(), response.status_code

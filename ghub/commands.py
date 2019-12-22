@@ -3,6 +3,7 @@ import os
 from termcolor import colored
 
 from .githubutils import (
+    event_dict,
     authorize,
     get_user_tabs,
     get_tree,
@@ -17,6 +18,9 @@ from .githubutils import (
     get_prs,
     get_pr,
     get_pr_info,
+    get_issues,
+    get_issue,
+    get_issue_info,
 )
 from .repoutils import get_items_in_tree, get_blob_content
 from .context import Context
@@ -79,6 +83,9 @@ class CD(Command):
                 if args[0] == "pull_requests":
                     get_prs(ghub)
                     return
+                elif args[0] == "issues":
+                    get_issues(ghub)
+                    return
                 for i in ghub.context.cache["tree"]:
                     if i["path"] == args[0]:
                         if i["type"] == "tree":
@@ -104,6 +111,8 @@ class CD(Command):
                 print("{} does not exist.".format(args[0]))
             elif ghub.context.context == "pull_requests":
                 get_pr(ghub, args[0])
+            elif ghub.context.context == "issues":
+                get_issue(ghub, args[0])
         elif len(args) == 2:
             if args[0] == "user":
                 get_user(ghub, args[1])
@@ -128,6 +137,7 @@ class CD(Command):
 class LS(Command):
     def __init__(self):
         self.setup("ls", "List everything in the current context")
+        self.default_repo_items = ["pull_requests"]
 
     def __call__(self, args, ghub):
         if (
@@ -146,11 +156,14 @@ class LS(Command):
                     i["name"] if not ghub.context.context == "stars" else i["full_name"]
                 )
         elif ghub.context.context == "repo":
+            for i in self.default_repo_items:
+                print(colored(i, "yellow"))
             for i in get_items_in_tree(ghub):
                 if i[1] == "tree":
                     print(colored(i[0], "green", attrs=["bold"]))
                 else:
                     print(i[0])
+
         elif ghub.context.context == "followers" or ghub.context.context == "following":
             for i in ghub.context.cache:
                 print(i["login"])
@@ -260,6 +273,59 @@ class CAT(Command):
                             )
                     else:
                         print("Error fetching the commits")
+                elif args[0] == "events":
+                    events, response_code = get_issue_info(ghub, "events")
+                    if response_code == 200:
+                        for event in events:
+                            if event["event"] in event_dict.keys():
+                                print(event_dict[event["event"]](event))
+                            else:
+                                print(" ".join(event["event"].split("_")))
+                    else:
+                        print("There was an error getting the events.")
+        elif ghub.context.context == "issue":
+            if len(args) == 0:
+                issue = ghub.context.cache
+                labels = []
+                for i in issue["labels"]:
+                    label = i["name"]
+                    labels.append(label)
+                print(
+                    "[{}] {}".format(
+                        colored(issue["state"], "yellow"),
+                        colored(issue["title"], "green"),
+                    )
+                )
+                print("Created by {}".format(issue["user"]["login"]))
+                print("Labels: {}".format(", ".join(labels)))
+                print(issue["body"])
+            if len(args) == 1:
+                if args[0] == "comments":
+                    content, code = get_issue_info(ghub)
+                    if code == 200:
+                        for i in content:
+                            owner = (
+                                i["author_association"] == "OWNER"
+                                or i["author_association"] == "MEMBER"
+                            )
+                            color = "green" if owner else "yellow"
+                            print(
+                                "{}: {}\n".format(
+                                    colored(i["user"]["login"], color), i["body"]
+                                )
+                            )
+                    else:
+                        print("Error fetching the comments")
+                if args[0] == "events":
+                    events, response_code = get_issue_info(ghub, "events")
+                    if response_code == 200:
+                        for event in events:
+                            if event["event"] in event_dict.keys():
+                                print(event_dict[event["event"]](event))
+                            else:
+                                print(" ".join(event["event"].split("_")))
+                    else:
+                        print("There was an error getting the events.")
         else:
             print(
                 "This command only works in the {} context".format(
