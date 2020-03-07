@@ -28,7 +28,7 @@ def paginate(content):
 
     tmp_file.flush()
     tmp_file.close()
-    p = subprocess.Popen(["less", "-R", path], stdin=subprocess.PIPE)
-    p.communicate()
+    proc = subprocess.Popen(["less", "-R", path], stdin=subprocess.PIPE)
+    proc.communicate()
 
     sys.stdout = sys.__stdout__
