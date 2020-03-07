@@ -5,8 +5,8 @@ import tempfile
 import subprocess, sys, curses
 
 
-def printHighlightContent(fileName, content):
-    lexer = get_lexer_for_filename(fileName)
+def printHighlightContent(file_name, content):
+    lexer = get_lexer_for_filename(file_name)
     if getTerminalColorSupport() == 256:
         paginate(highlight(content, lexer, Terminal256Formatter()))
     else:
@@ -28,7 +28,7 @@ def paginate(content):
 
     tmp_file.flush()
     tmp_file.close()
-    p = subprocess.Popen(["less", "-R", path], stdin=subprocess.PIPE)
-    p.communicate()
+    proc = subprocess.Popen(["less", "-R", path], stdin=subprocess.PIPE)
+    proc.communicate()
 
     sys.stdout = sys.__stdout__
