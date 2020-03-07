@@ -1,7 +1,7 @@
 import sys
 import os
 from termcolor import colored
-from .syntaxHightlight import highlight_and_paginate_content
+from .output_formatter import highlight_and_paginate_content
 
 from .githubutils import (
     event_dict,
