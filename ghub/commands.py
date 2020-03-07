@@ -1,7 +1,7 @@
 import sys
 import os
 from termcolor import colored
-from .syntaxHightlight import printHighlightContent
+from .syntaxHightlight import highlight_and_paginate_content
 
 from .githubutils import (
     event_dict,
@@ -229,7 +229,7 @@ class CAT(Command):
                 if i["path"] == args[0]:
                     if i["type"] == "blob":
                         content = get_blob_content(ghub, i["url"])
-                        printHighlightContent(i["path"], content)
+                        highlight_and_paginate_content(i["path"], content)
                         return True
                     else:
                         print("{} is not a file.".format(args[0]))
