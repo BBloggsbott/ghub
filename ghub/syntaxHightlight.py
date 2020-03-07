@@ -5,15 +5,15 @@ import tempfile
 import subprocess, sys, curses
 
 
-def printHighlightContent(fileName, content):
-    lexer = get_lexer_for_filename(fileName)
-    if getTerminalColorSupport() == 256:
+def highlight_and_paginate_content(file_name, content):
+    lexer = get_lexer_for_filename(file_name)
+    if get_terminal_color_support() == 256:
         paginate(highlight(content, lexer, Terminal256Formatter()))
     else:
         paginate(highlight(content, lexer, TerminalFormatter()))
 
 
-def getTerminalColorSupport():
+def get_terminal_color_support():
     curses.setupterm()
     return curses.tigetnum("colors")
 
