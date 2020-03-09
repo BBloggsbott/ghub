@@ -4,7 +4,12 @@ python:
 install:
 - pip install -r requirements.txt
 script:
+- chmod +x set_env_variables.sh
+- source ./set_env_variables.sh
 - pre-commit install
 - pre-commit run --all-files
 - pytest --cov=./
 - codecov
+before_install:
+- openssl aes-256-cbc -K $encrypted_0f29c5e04715_key -iv $encrypted_0f29c5e04715_iv
+  -in set_env_variables.sh.enc -out set_env_variables.sh -d
