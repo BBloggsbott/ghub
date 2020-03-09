@@ -1,12 +1,17 @@
 from pygments import highlight
 from pygments.lexers import get_lexer_for_filename
+from pygments.lexers.special import RawTokenLexer
 from pygments.formatters import TerminalFormatter, Terminal256Formatter
 import tempfile
 import subprocess, sys, curses
 
 
 def highlight_and_paginate_content(file_name, content):
-    lexer = get_lexer_for_filename(file_name)
+    lexer = None
+    try:
+        lexer = get_lexer_for_filename(file_name)
+    except:
+        lexer = RawTokenLexer()
     if get_terminal_color_support() == 256:
         paginate(highlight(content, lexer, Terminal256Formatter()))
     else:
